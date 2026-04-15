@@ -168,4 +168,31 @@ int main() {
 }
 
 
+# rust
+use std::io::{self, Read};
+
+fn main() {
+    // Read the entire input and parse it as an integer `n`.
+    let mut input = String::new();
+    io::stdin().read_to_string(&mut input).unwrap();
+    let n: i32 = input.trim().parse().unwrap();
+
+    // Compute the approximation of e using the series sum_{k=0}^{n} 1/k!.
+    let mut e: f64 = 1.0; // Starts with the term for k = 0.
+    let mut term: f64 = 1.0; // Represents 1/k!; initially k = 0.
+
+    let mut i = 1;
+    while i <= n && term > 0.0 {
+        term /= i as f64; // term becomes 1/i!
+        e += term;
+        i += 1;
+    }
+
+    // Output with different precision depending on the value of `n`.
+    if n < 3 {
+        println!("{:.1}", e);
+    } else {
+        println!("{:.5}", e);
+    }
+}
 
