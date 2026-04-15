@@ -154,3 +154,48 @@ int main() {
 }
 
 
+# rust
+use std::io::stdin;
+
+fn main() {
+    let mut numbers = stdin().lines().next().unwrap().unwrap()
+        .split_whitespace()
+        .map(|str| str.parse::<i32>().unwrap())
+        .collect::<Vec<i32>>();
+    let maximum_index = numbers.iter().enumerate().fold(
+        (0_usize, &i32::MIN),
+        |last_maximum, number| {
+            if last_maximum.1 < number.1 {
+                number
+            } else {
+                last_maximum
+            }
+        }
+    ).0;
+    let minimum_index = numbers.iter().enumerate().fold(
+        (0_usize, &i32::MAX),
+        |last_minimum, number| {
+            if last_minimum.1 > number.1 {
+                number
+            } else {
+                last_minimum
+            }
+        }
+    ).0;
+    (numbers[minimum_index], numbers[maximum_index]) =
+        (numbers[maximum_index], numbers[minimum_index]);
+    let mut output = String::with_capacity(numbers.len() * 2 - 1);
+    let last_index = numbers.len() - 1;
+    numbers.into_iter().enumerate().for_each(
+        |(index, number)| {
+            output.push_str(number.to_string().as_str());
+            if index != last_index {
+                output.push(' ');
+            }
+        }  
+    );
+    print!("{output}");
+}
+
+
+
