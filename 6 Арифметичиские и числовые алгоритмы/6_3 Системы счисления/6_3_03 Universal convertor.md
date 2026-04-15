@@ -196,3 +196,53 @@ int main()
     }
     cout << endl;
 }
+
+
+
+# rust
+use std::io::{self, Read};
+
+static DIGITS: &[u8] = b"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+fn convert(num_str: &str, from_base: u32, to_base: u32) -> String {
+    // Parse the input number in the source base.
+    // `from_str_radix` works up to base 36, which matches the digit table.
+    let mut num = u128::from_str_radix(num_str, from_base).expect("invalid number for the given base");
+
+    // Special case for zero.
+    if num == 0 {
+        return "0".to_string();
+    }
+
+    let mut result = Vec::new();
+
+    while num > 0 {
+        let rem = (num % to_base as u128) as usize;
+        result.push(DIGITS[rem] as char);
+        num /= to_base as u128;
+    }
+
+    // The digits were collected in reverse order; reverse them to obtain the final string.
+    result.iter().rev().collect()
+}
+
+fn main() {
+    // Read the entire stdin.
+    let mut input = String::new();
+    io::stdin().read_to_string(&mut input).expect("failed to read stdin");
+
+    // Expect three whitespace‑separated tokens: n, a, k
+    let mut parts = input.split_whitespace();
+    let n_str = parts.next().expect("missing source base");
+    let a_str = parts.next().expect("missing number to convert");
+    let k_str = parts.next().expect("missing target base");
+
+    // Convert bases to numbers.
+    let from_base: u32 = n_str.trim().parse().expect("invalid source base");
+    let to_base: u32 = k_str.trim().parse().expect("invalid target base");
+
+    let converted = convert(a_str.trim(), from_base, to_base);
+    println!("{}", converted);
+}
+
+

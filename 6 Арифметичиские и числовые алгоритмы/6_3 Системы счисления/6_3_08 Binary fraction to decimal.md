@@ -72,46 +72,23 @@ puts result
 
 
 # python
-
-# Function to convert binary fractional  
-# to decimal 
-def binaryToDecimal(binary, length) :
+def binary2decimal(num: str)-> float:    
+    int_part, frac_part, *_ = f'{num}.'.split('.')
+    res = 0
     
-    # Fetch the radix point 
-    point = binary.find('.')
-
-    # Update point if not found 
-    if (point == -1) :
-        point = length 
-
-    intDecimal = 0
-    fracDecimal = 0
-    twos = 1
-
-    # Convert integral part of binary 
-    # to decimal equivalent 
-    for i in range(point-1, -1, -1) : 
+    k = 1
+    for d in map(int, reversed(int_part)):
+        res += d * k
+        k <<= 1
         
-        # Subtract '0' to convert 
-        # character into integer 
-        intDecimal += ((ord(binary[i]) - 
-                        ord('0')) * twos) 
-        twos *= 2
+    k = 2
+    for d in map(int, frac_part):
+        res += d / k
+        k <<= 1
+    res = int(res * 1e12) / 1e12
+    return int(res) if res.is_integer() else res
 
-    # Convert fractional part of binary 
-    # to decimal equivalent 
-    twos = 2
-    
-    for i in range(point + 1, length):
-        
-        fracDecimal += ((ord(binary[i]) -
-                         ord('0')) / twos); 
-        twos *= 2.0
-
-    # Add both integral and fractional part 
-    ans = intDecimal + fracDecimal
-    
-    return ans
+print(binary2decimal(input()))
 
 
 # java
@@ -202,4 +179,71 @@ int main() {
     printf("%.12g\n", n);
     return 0;
 }
+
+
+
+# rust
+use std::io::{self, Write};
+
+/// Convert a binary string (which may contain a radix point) to its decimal value.
+///
+/// * `binary` – The binary representation as a string slice.
+/// * `length` – The length of the binary string (normally `binary.len()`).
+///
+/// Returns the decimal value as `f64`. If the binary string has no fractional part,
+/// the fractional component will be `0.0`.
+fn binary_to_decimal(binary: &str, length: usize) -> f64 {
+    // Find the position of the radix point, if any.
+    let point = binary.find('.').unwrap_or(length);
+
+    // ----- Integral part -----
+    let mut integer_decimal: i64 = 0;
+    let mut twos: i64 = 1;
+
+    // Iterate from the bit just left of the point down to the most‑significant bit.
+    for i in (0..point).rev() {
+        // `binary.as_bytes()[i]` gives the ASCII code of the character.
+        let bit = (binary.as_bytes()[i] - b'0') as i64;
+        integer_decimal += bit * twos;
+        twos <<= 1; // multiply by 2
+    }
+
+    // ----- Fractional part -----
+    let mut fractional_decimal: f64 = 0.0;
+    let mut twos_f: f64 = 2.0;
+
+    // Iterate over the bits right of the point.
+    for i in (point + 1)..length {
+        let bit = (binary.as_bytes()[i] - b'0') as f64;
+        fractional_decimal += bit / twos_f;
+        twos_f *= 2.0;
+    }
+
+    // Combine both parts.
+    integer_decimal as f64 + fractional_decimal
+}
+
+fn main() {
+    // Read a line from stdin.
+    let mut input = String::new();
+    io::stdin()
+        .read_line(&mut input)
+        .expect("Failed to read line");
+    let n = input.trim(); // remove trailing newline / spaces
+
+    let result = binary_to_decimal(n, n.len());
+
+    // If the result is an integer, print it without a decimal point.
+    if (result.fract() - 0.0).abs() < f64::EPSILON {
+        // Safe to cast because the fractional part is zero.
+        println!("{}", result as i64);
+    } else {
+        // Print the floating‑point value (default formatting).
+        println!("{}", result);
+    }
+
+    // Flush stdout to ensure the output appears promptly.
+    io::stdout().flush().unwrap();
+}
+
 

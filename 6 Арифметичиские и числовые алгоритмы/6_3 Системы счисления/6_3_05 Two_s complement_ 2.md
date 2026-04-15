@@ -39,3 +39,60 @@ else
     i = s.to_i(2) + 1
     print -i
 end   
+
+
+
+# java
+import java.util.Scanner;
+class Main {
+    public static void main(String[] args) {
+    Scanner myscan=new Scanner(System.in);
+    String dv=myscan.nextLine();
+        String dv1="";
+        String dv2="";
+        if(dv.substring(0,1).equals("1")==true){
+            dv1="0"+dv.substring(1);
+        for(int i=0;i<dv.length()-1;i++)
+            dv2+="1";
+        System.out.println(Integer.parseInt(dv1,2)-Integer.parseInt(dv2,2)-1);}
+        else System.out.println(Integer.parseInt(dv,2));
+    }
+}
+
+
+
+# rust
+use std::io::{self, Read};
+
+fn main() {
+    // Read the entire input (the binary string)
+    let mut input = String::new();
+    io::stdin().read_to_string(&mut input).expect("Failed to read input");
+    let b = input.trim(); // remove trailing newline characters
+
+    // Parse the binary string as a signed 64‑bit integer
+    let value = i64::from_str_radix(b, 2).expect("Input must be a binary number");
+
+    // Get the most significant bit (the first character) as an integer (0 or 1)
+    let msb = b
+        .chars()
+        .next()
+        .expect("Input cannot be empty")
+        .to_digit(10)
+        .expect("First character must be 0 or 1") as i64;
+
+    // Compute the shift amount (length of the binary string)
+    let shift = b.len() as u32;
+
+    // Perform the required calculation:
+    // value - (msb << shift)
+    let result = value - (msb << shift);
+
+    // Output the result
+    println!("{}", result);
+}
+
+
+
+
+

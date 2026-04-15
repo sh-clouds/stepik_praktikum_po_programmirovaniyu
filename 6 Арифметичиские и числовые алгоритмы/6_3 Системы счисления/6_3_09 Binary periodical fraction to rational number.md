@@ -156,3 +156,105 @@ int main()
     }
     cout << result << " " << Stepen << endl;
 }
+
+
+
+# rust
+use std::io::{self, Read};
+
+/// Compute the greatest common divisor of two positive integers using
+/// the Euclidean algorithm.
+fn gcd(mut a: u128, mut b: u128) -> u128 {
+    while a != 0 && b != 0 {
+        if a > b {
+            a %= b;
+        } else {
+            b %= a;
+        }
+    }
+    a + b
+}
+
+/// Convert a binary fraction string (e.g. "101") to its decimal `f64` value.
+/// The string contains only the bits after the decimal point.
+fn binary_fraction_to_f64(frac_bits: &str) -> f64 {
+    let mut value = 0.0_f64;
+    for (i, ch) in frac_bits.chars().enumerate() {
+        let bit = ch.to_digit(2).unwrap_or(0) as f64;
+        // i starts at 0 → the first bit has weight 1/2, the second 1/4, …
+        value += bit / (2_f64.powi((i as i32) + 1));
+    }
+    value
+}
+
+/// Convert a binary number (possibly containing a `.`) to a decimal `f64`.
+fn binary_string_to_f64(bin: &str) -> f64 {
+    if let Some(dot_pos) = bin.find('.') {
+        // Split into integer and fractional parts.
+        let (int_part_str, frac_part_str) = bin.split_at(dot_pos);
+        // `split_at` keeps the dot on the left side, drop it.
+        let frac_part_str = &frac_part_str[1..];
+
+        let int_part = if int_part_str.is_empty() {
+            0_u64
+        } else {
+            u64::from_str_radix(int_part_str, 2).unwrap_or(0)
+        };
+
+        let frac_value = binary_fraction_to_f64(frac_part_str);
+        (int_part as f64) + frac_value
+    } else {
+        // Pure integer, parse directly.
+        let int_part = u64::from_str_radix(bin, 2).unwrap_or(0);
+        int_part as f64
+    }
+}
+
+fn main() {
+    // ----- read the whole input ------------------------------------------------
+    let mut input = String::new();
+    io::stdin().read_to_string(&mut input).unwrap();
+    let binary_input = input.trim(); // remove trailing newline(s)
+
+    // ----- convert binary to decimal (as a floating point number) ----------------
+    let decimal_value = binary_string_to_f64(binary_input);
+    let decimal_str = decimal_value.to_string();
+
+    // ----- decide how to output -------------------------------------------------
+    if !decimal_str.contains('.') {
+        // Whole number case – output "<number> 1"
+        println!("{} 1", decimal_str);
+        return;
+    }
+
+    // Fractional case – work with the decimal representation.
+    let parts: Vec<&str> = decimal_str.split('.').collect();
+    let int_part_str = parts[0];
+    let frac_part_str = parts[1];
+
+    // Number of decimal digits after the point.
+    let k = frac_part_str.len() as u32;
+    // 10^k as u128
+    let ten_pow_k: u128 = 10_u128.pow(k);
+
+    // Integer value of the fractional part (e.g. "125" → 125).
+    let frac_int: u128 = frac_part_str.parse::<u128>().unwrap_or(0);
+
+    // Reduce the fraction (frac_int / 10^k) by their GCD.
+    let common_gcd = gcd(ten_pow_k, frac_int);
+
+    if int_part_str == "0" {
+        // The number is purely fractional: output "<num>/<den>"
+        let numerator = frac_int / common_gcd;
+        let denominator = ten_pow_k / common_gcd;
+        println!("{} {}", numerator, denominator);
+    } else {
+        // Mixed number: combine integer and fractional parts.
+        let int_part: u128 = int_part_str.parse::<u128>().unwrap_or(0);
+        let combined_numerator = int_part * ten_pow_k + frac_int;
+        let numerator = combined_numerator / common_gcd;
+        let denominator = ten_pow_k / common_gcd;
+        println!("{} {}", numerator, denominator);
+    }
+}
+
